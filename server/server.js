@@ -17,10 +17,23 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS — allow requests from your React app
+// ✅ Dynamic CORS setup
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://mern-blog-app-jet-omega.vercel.app', // your Vercel frontend
+];
+
+// Allow all during local dev, restrict in production
 app.use(
   cors({
-    origin:  ['http://localhost:3000'], // React dev ports
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`❌ Blocked CORS request from: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
@@ -45,7 +58,7 @@ const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 app.listen(PORT, () => {
-  console.log(`Server running in ${NODE_ENV} mode on port ${PORT}`);
+  console.log(`✅ Server running in ${NODE_ENV} mode on port ${PORT}`);
 });
 
 module.exports = app;
